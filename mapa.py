@@ -1,56 +1,62 @@
 import streamlit as st
+import geopandas as gpd
 import pandas as pd
-import zipfile
-import requests
-import io
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-# URL del archivo comprimido
-zip_url_resultados = 'https://www.argentina.gob.ar/sites/default/files/2023_generales_1.zip'
+# Cargar el archivo GeoJSON
+@st.cache
+def load_geojson(file_path):
+    return gpd.read_file(file_path)
 
-# Descargar y descomprimir el archivo
-def download_and_extract_zip(url):
-    response = requests.get(url)
-    with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-        z.extractall('data')
+# Cargar el archivo CSV con los nombres de cabeceras
+@st.cache
+def load_csv(file_path):
+    return pd.read_csv(file_path)
 
 # Cargar los datos
-def load_data():
-    download_and_extract_zip(zip_url_resultados)
-    # Aquí deberías adaptar el nombre del archivo según lo que contiene el zip
-    try:
-        df = pd.read_csv('2023_Generales/ResultadoElectorales_2023_Generales.csv', delimiter=',', quotechar='"', on_bad_lines='skip')
-    except Exception as e:
-        st.error(f'Error al cargar los datos: {e}')
-        return pd.DataFrame()  # Retorna un DataFrame vacío en caso de error
-    return df
+geojson_file = 'path_to_your_geojson_file.geojson'
+csv_file = 'path_to_your_csv_file.csv'
 
-# Crear la aplicación en Streamlit
-def main():
-    st.title('Resultados Electorales por Cabecera')
-    
-    # Cargar los datos
-    df = load_data()
-    
-    if df.empty:
-        st.warning('No se pudieron cargar los datos.')
-        return
-    
-    # Verificar las columnas disponibles
-    st.write('Columnas disponibles:', df.columns)
-    
-    # Selección de cabecera
-    if 'cabecera' not in df.columns:
-        st.error('La columna "Cabecera" no se encuentra en el archivo.')
-        return
-    
-    cabeceras = df['cabecera'].unique()
-    selected_cabecera = st.selectbox('Selecciona una cabecera:', cabeceras)
-    
-    # Filtrar los datos por cabecera
-    filtered_df = df[df['cabecera'] == selected_cabecera]
-    
-    st.write(f'Resultados para la cabecera: {selected_cabecera}')
-    st.dataframe(filtered_df)
+geo_data = load_geojson(geojson_file)
+header_data = load_csv(csv_file)
 
-if __name__ == "__main__":
-    main()
+# Configuración de Streamlit
+st.title('Mapa de Circuitos Electorales')
+
+# Selección de la cabecera
+st.sidebar.header('Seleccionar Cabecera')
+selected_header = st.sidebar.selectbox('Elige una cabecera', header_data['seccion_nombre'].unique())
+
+# Mostrar mapa para la cabecera seleccionada
+if st.sidebar.button('Mostrar Mapa para la Cabecera Seleccionada'):
+    # Filtrar los datos del GeoDataFrame
+    filtered_geo_data = geo_data[geo_data['departamen'] == selected_header]
+    
+    fig, ax = plt.subplots(figsize=(10, 10))
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+    
+    # Graficar el mapa
+    filtered_geo_data.plot(ax=ax, color='lightblue', edgecolor='black')
+    ax.set_title(f'Circuitos Electorales para {selected_header}', fontsize=16)
+    ax.set_xlabel('Longitud', fontsize=12)
+    ax.set_ylabel('Latitud', fontsize=12)
+    
+    st.pyplot(fig)
+
+# Mostrar todos los circuitos con sus cabeceras
+if st.sidebar.checkbox('Ver Todos los Circuitos con Sus Cabeceras'):
+    fig, ax = plt.subplots(figsize=(10, 10))
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+    
+    # Graficar todos los circuitos
+    geo_data.plot(ax=ax, color='lightblue', edgecolor='black')
+    ax.set_title('Todos los Circuitos Electorales', fontsize=16)
+    ax.set_xlabel('Longitud', fontsize=12)
+    ax.set_ylabel('Latitud', fontsize=12)
+    
+    st.pyplot(fig)
+
