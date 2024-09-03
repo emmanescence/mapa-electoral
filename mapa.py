@@ -1,33 +1,34 @@
 import streamlit as st
 import geopandas as gpd
 import pandas as pd
+import requests
+import zipfile
+import io
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+# Función para descargar y leer el archivo GeoJSON desde un ZIP
+@st.cache
+def load_geojson_from_zip(zip_url, geojson_filename):
+    response = requests.get(zip_url)
+    zip_file = zipfile.ZipFile(io.BytesIO(response.content))
+    with zip_file.open(geojson_filename) as geojson_file:
+        return gpd.read_file(geojson_file)
+
+# URL del archivo comprimido y nombre del archivo GeoJSON dentro del ZIP
+zip_url_circ = 'https://catalogo.datos.gba.gob.ar/dataset/4fe68b69-c788-4c06-ac67-26e4ebc7416b/resource/37bd466c-4a80-4e2e-be11-a68cfe60aa1e/download/circuitos-electorales.zip'
+archivo_geojson = 'circuitos-electorales.geojson'
+
 # Cargar el archivo GeoJSON
-@st.cache
-def load_geojson(file_path):
-    return gpd.read_file(file_path)
-
-# Cargar el archivo CSV con los nombres de cabeceras
-@st.cache
-def load_csv(file_path):
-    return pd.read_csv(file_path)
-
-# Cargar los datos
-geojson_file = 'path_to_your_geojson_file.geojson'
-csv_file = 'path_to_your_csv_file.csv'
-
-geo_data = load_geojson(geojson_file)
-header_data = load_csv(csv_file)
+geo_data = load_geojson_from_zip(zip_url_circ, archivo_geojson)
 
 # Configuración de Streamlit
 st.title('Mapa de Circuitos Electorales')
 
 # Selección de la cabecera
 st.sidebar.header('Seleccionar Cabecera')
-selected_header = st.sidebar.selectbox('Elige una cabecera', header_data['seccion_nombre'].unique())
+header_options = geo_data['departamen'].unique()
+selected_header = st.sidebar.selectbox('Elige una cabecera', header_options)
 
 # Mostrar mapa para la cabecera seleccionada
 if st.sidebar.button('Mostrar Mapa para la Cabecera Seleccionada'):
