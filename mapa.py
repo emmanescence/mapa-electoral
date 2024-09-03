@@ -17,7 +17,11 @@ def download_and_extract_zip(url):
 def load_data():
     download_and_extract_zip(zip_url_resultados)
     # Aquí deberías adaptar el nombre del archivo según lo que contiene el zip
-    df = pd.read_csv('circuitos-electorales.geojson')  # Cambia 'resultado_de_ubicacion.csv' por el nombre correcto
+    try:
+        df = pd.read_csv('circuitos-electorales.geojson', delimiter=',', error_bad_lines=False, warn_bad_lines=True)
+    except Exception as e:
+        st.error(f'Error al cargar los datos: {e}')
+        return pd.DataFrame()  # Retorna un DataFrame vacío en caso de error
     return df
 
 # Crear la aplicación en Streamlit
@@ -26,6 +30,10 @@ def main():
     
     # Cargar los datos
     df = load_data()
+    
+    if df.empty:
+        st.warning('No se pudieron cargar los datos.')
+        return
     
     # Selección de cabecera
     cabeceras = df['Cabecera'].unique()  # Asegúrate de que la columna se llama 'Cabecera'
@@ -39,4 +47,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
