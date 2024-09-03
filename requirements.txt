@@ -1,6 +1,6 @@
 streamlit
 geopandas
-zipfile
+
 pandas
 matplotlib
 requests
