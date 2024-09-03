@@ -2,9 +2,6 @@ streamlit
 geopandas
 pandas
 matplotlib
-ipywidgets
-display
-HTML
 requests
 zipfile
 io
