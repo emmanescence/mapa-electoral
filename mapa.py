@@ -17,7 +17,7 @@ def download_and_extract_zip(url):
 def load_data():
     download_and_extract_zip(zip_url_resultados)
     # Aquí deberías adaptar el nombre del archivo según lo que contiene el zip
-    df = pd.read_csv('data/resultado_de_ubicacion.csv')  # Cambia 'resultado_de_ubicacion.csv' por el nombre correcto
+    df = pd.read_csv('circuitos-electorales.geojson')  # Cambia 'resultado_de_ubicacion.csv' por el nombre correcto
     return df
 
 # Crear la aplicación en Streamlit
