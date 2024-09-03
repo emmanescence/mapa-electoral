@@ -3,5 +3,4 @@ geopandas
 pandas
 matplotlib
 requests
-zipfile
-io
+ipywidgets
