@@ -18,7 +18,7 @@ def load_data():
     download_and_extract_zip(zip_url_resultados)
     # Aquí deberías adaptar el nombre del archivo según lo que contiene el zip
     try:
-        df = pd.read_csv('circuitos-electorales.geojson', delimiter=',', quotechar='"', on_bad_lines='skip')
+        df = pd.read_csv('2023_Generales/ResultadoElectorales_2023_Generales.csv', delimiter=',', quotechar='"', on_bad_lines='skip')
     except Exception as e:
         st.error(f'Error al cargar los datos: {e}')
         return pd.DataFrame()  # Retorna un DataFrame vacío en caso de error
