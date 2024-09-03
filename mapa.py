@@ -18,7 +18,7 @@ def load_data():
     download_and_extract_zip(zip_url_resultados)
     # Aquí deberías adaptar el nombre del archivo según lo que contiene el zip
     try:
-        df = pd.read_csv('circuitos-electorales.geojson', delimiter=',', error_bad_lines=False, warn_bad_lines=True)
+        df = pd.read_csv('circuitos-electorales.geojson', delimiter=',', quotechar='"', on_bad_lines='skip')
     except Exception as e:
         st.error(f'Error al cargar los datos: {e}')
         return pd.DataFrame()  # Retorna un DataFrame vacío en caso de error
@@ -35,8 +35,15 @@ def main():
         st.warning('No se pudieron cargar los datos.')
         return
     
+    # Verificar las columnas disponibles
+    st.write('Columnas disponibles:', df.columns)
+    
     # Selección de cabecera
-    cabeceras = df['Cabecera'].unique()  # Asegúrate de que la columna se llama 'Cabecera'
+    if 'Cabecera' not in df.columns:
+        st.error('La columna "Cabecera" no se encuentra en el archivo.')
+        return
+    
+    cabeceras = df['Cabecera'].unique()
     selected_cabecera = st.selectbox('Selecciona una cabecera:', cabeceras)
     
     # Filtrar los datos por cabecera
