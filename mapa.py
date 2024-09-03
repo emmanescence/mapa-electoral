@@ -39,15 +39,15 @@ def main():
     st.write('Columnas disponibles:', df.columns)
     
     # Selección de cabecera
-    if 'Cabecera' not in df.columns:
+    if 'cabecera' not in df.columns:
         st.error('La columna "Cabecera" no se encuentra en el archivo.')
         return
     
-    cabeceras = df['Cabecera'].unique()
+    cabeceras = df['cabecera'].unique()
     selected_cabecera = st.selectbox('Selecciona una cabecera:', cabeceras)
     
     # Filtrar los datos por cabecera
-    filtered_df = df[df['Cabecera'] == selected_cabecera]
+    filtered_df = df[df['cabecera'] == selected_cabecera]
     
     st.write(f'Resultados para la cabecera: {selected_cabecera}')
     st.dataframe(filtered_df)
